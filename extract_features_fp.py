@@ -95,7 +95,7 @@ if __name__ == '__main__':
 		print(slide_id)
 
 		if not args.no_auto_skip:
-			suffix = '.hdf5' if args.shuffle_for_parallel else '.pt'
+			suffix = '.h5' if args.shuffle_for_parallel else '.pt'
 			dest_folder = 'h5_files' if args.shuffle_for_parallel else 'pt_files'
 			dest_files = os.listdir(os.path.join(args.feat_dir, dest_folder))
 			if slide_id+suffix in dest_files:
