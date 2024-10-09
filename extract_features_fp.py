@@ -80,9 +80,9 @@ if __name__ == '__main__':
 	_ = model.eval()
 	model = model.to(device)
 	total = len(bags_dataset)
-    idx_list = list(range(total))
-    if args.shuffle_for_parallel:
-        random.shuffle(idx_list)
+	idx_list = list(range(total))
+	if args.shuffle_for_parallel:
+		random.shuffle(idx_list)
 
 	loader_kwargs = {'num_workers': 8, 'pin_memory': True} if device.type == "cuda" else {}
 
@@ -95,12 +95,12 @@ if __name__ == '__main__':
 		print(slide_id)
 
 		if not args.no_auto_skip:
-            suffix = '.hdf5' if args.shuffle_for_parallel else '.pt'
-            dest_folder = 'h5_files' if args.shuffle_for_parallel else 'pt_files'
-            dest_files = os.listdir(os.path.join(args.feat_dir, dest_folder))
-            if slide_id+suffix in dest_files:
-                print('skipped {}'.format(slide_id))
-                continue
+			suffix = '.hdf5' if args.shuffle_for_parallel else '.pt'
+			dest_folder = 'h5_files' if args.shuffle_for_parallel else 'pt_files'
+			dest_files = os.listdir(os.path.join(args.feat_dir, dest_folder))
+			if slide_id+suffix in dest_files:
+				print('skipped {}'.format(slide_id))
+				continue
 
 		output_path = os.path.join(args.feat_dir, 'h5_files', bag_name)
 		time_start = time.time()
