@@ -51,5 +51,5 @@ test_seg_df.to_csv(seg_dir / 'test_process_list.csv', index = False)
 
 os.makedirs(Path(args.split_dir), exist_ok = True)
 split_dict['test'] = split_dict['val']
-split_df = pd.DataFrame(split_dict)
+split_df = pd.concat([pd.DataFrame(v, columns = [k]) for k, v in split_dict.items()], axis = 1)
 split_df.to_csv(Path(args.split_dir) / 'splits_0.csv', index = False)
