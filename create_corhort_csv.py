@@ -49,7 +49,7 @@ test_dat_df = pd.DataFrame(test_dict)
 test_dat_df.to_csv(Path(args.dataset_csv_dir) / 'test.csv', index = False)
 test_seg_df.to_csv(seg_dir / 'test_process_list.csv', index = False)
 
-os.madedirs(Path(args.split_dir), exist_ok = True)
+os.makedirs(Path(args.split_dir), exist_ok = True)
 split_dict['test'] = split_dict['val']
 split_df = pd.DataFrame(split_dict)
 split_df.to_csv(Path(args.split_dir) / 'splits_0.csv', index = False)
