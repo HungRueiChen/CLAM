@@ -5,6 +5,15 @@ from pathlib import Path
 import argparse
 import os
 
+# disease renaming
+def renaming(disease):
+	if disease == 'AML_APL':
+		return 'AML'
+	elif disease == 'Lymphoma_CLL':
+		return 'Lymphoma'
+	else:
+		return disease
+		
 # arguments
 parser = argparse.ArgumentParser(description="Create csv for CLAM from cohort json file", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--json_file", help = 'json file containing hierarchy of splits, classes, then slide ids')
@@ -14,7 +23,7 @@ parser.add_argument("--split_dir", help = 'directory to store split_0.csv')
 args = parser.parse_args()
 
 with open(Path(args.json_file), 'r') as f:
-    cohort_dict = json.load(f)
+	cohort_dict = json.load(f)
 seg_dir = Path(args.seg_csv).parent
 df = pd.read_csv(Path(args.seg_csv))
 training_seg_df = pd.DataFrame()
@@ -30,11 +39,11 @@ for subset, class_dict in cohort_dict.items():
 		if subset == 'test':
 			test_seg_df = pd.concat([test_seg_df, temp])
 			test_dict['case_id'] += pid_list
-			test_dict['label'] += [disease] * len(pid_list)
+			test_dict['label'] += [renaming(disease)] * len(pid_list)
 		else:
 			training_seg_df = pd.concat([training_seg_df, temp])
 			training_dict['case_id'] += pid_list
-			training_dict['label'] += [disease] * len(pid_list)
+			training_dict['label'] += [renaming(disease)] * len(pid_list)
 			k = 'val' if subset == 'validation' else 'train'
 			split_dict[k] += pid_list				
 
