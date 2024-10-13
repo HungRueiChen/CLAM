@@ -98,7 +98,7 @@ parser.add_argument('--model_type', type=str, choices=['clam_sb', 'clam_mb', 'mi
 parser.add_argument('--exp_code', type=str, help='experiment code for saving results')
 parser.add_argument('--weighted_sample', action='store_true', default=False, help='enable weighted sampling')
 parser.add_argument('--model_size', type=str, choices=['small', 'big'], default='small', help='size of model, does not affect mil')
-parser.add_argument('--task', type=str, choices=['BM_cytlolgy_classification', 'task_1_tumor_vs_normal',  'task_2_tumor_subtyping'])
+parser.add_argument('--task', type=str, choices=['BM_cytology_classification', 'task_1_tumor_vs_normal',  'task_2_tumor_subtyping'])
 ### CLAM specific options
 parser.add_argument('--no_inst_cluster', action='store_true', default=False,
                      help='disable instance-level clustering')
@@ -160,7 +160,7 @@ if args.task == 'BM_cytology_classification':
                             seed = args.seed, 
                             print_info = True,
                             label_dict = {'ALL':0, 'AML':1, 'CML':2, 'Lymphoma':3, 'MM':4},
-                            patient_strat=False,
+                            label_col = 'label', patient_strat=False,
                             ignore=[])
 
 elif args.task == 'task_1_tumor_vs_normal':
