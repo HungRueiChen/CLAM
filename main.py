@@ -156,7 +156,7 @@ if args.task == 'BM_cytology_classification':
     args.n_classes=5
     dataset = Generic_MIL_Dataset(csv_path = 'CLAM_dataset_csv/training.csv',
                             data_dir= os.path.join(args.data_root_dir, 'CLAM_training_feat'),
-                            shuffle = True, 
+                            shuffle = False, 
                             seed = args.seed, 
                             print_info = True,
                             label_dict = {'ALL':0, 'AML':1, 'CML':2, 'Lymphoma':3, 'MM':4},
