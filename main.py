@@ -98,7 +98,7 @@ parser.add_argument('--model_type', type=str, choices=['clam_sb', 'clam_mb', 'mi
 parser.add_argument('--exp_code', type=str, help='experiment code for saving results')
 parser.add_argument('--weighted_sample', action='store_true', default=False, help='enable weighted sampling')
 parser.add_argument('--model_size', type=str, choices=['small', 'big'], default='small', help='size of model, does not affect mil')
-parser.add_argument('--task', type=str, choices=['task_1_tumor_vs_normal',  'task_2_tumor_subtyping'])
+parser.add_argument('--task', type=str, choices=['BM_cytlolgy_classification', 'task_1_tumor_vs_normal',  'task_2_tumor_subtyping'])
 ### CLAM specific options
 parser.add_argument('--no_inst_cluster', action='store_true', default=False,
                      help='disable instance-level clustering')
@@ -152,7 +152,18 @@ if args.model_type in ['clam_sb', 'clam_mb']:
 
 print('\nLoad Dataset')
 
-if args.task == 'task_1_tumor_vs_normal':
+if args.task == 'BM_cytology_classification':
+    args.n_classes=5
+    dataset = Generic_MIL_Dataset(csv_path = 'CLAM_dataset_csv/training.csv',
+                            data_dir= os.path.join(args.data_root_dir, 'CLAM_training_feat'),
+                            shuffle = True, 
+                            seed = args.seed, 
+                            print_info = True,
+                            label_dict = {'ALL':0, 'AML':1, 'CML':2, 'Lymphoma':3, 'MM':4},
+                            patient_strat=False,
+                            ignore=[])
+
+elif args.task == 'task_1_tumor_vs_normal':
     args.n_classes=2
     dataset = Generic_MIL_Dataset(csv_path = 'dataset_csv/tumor_vs_normal_dummy_clean.csv',
                             data_dir= os.path.join(args.data_root_dir, 'tumor_vs_normal_resnet_features'),
