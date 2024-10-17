@@ -188,7 +188,7 @@ for idx, y in enumerate(y_true):
     y_true_onehot[idx][y] = 1.0
 
 y_pred = df['Y_hat'].to_numpy(dtype = int)
-y_pred_probs = df.loc[['p0','p1','p2','p3','p4']].to_numpy(dtype = float)
+y_pred_probs = df[['p0','p1','p2','p3','p4']].to_numpy(dtype = float)
     
 # calculate metrics
 result_dict = {}
