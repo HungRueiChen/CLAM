@@ -181,7 +181,7 @@ def draw_roc_curve(y_true, y_pred, log_dir, f_name, result_dict, classes):
 
 
 # load pred scores
-df = pd.read_csv(args.csv_path, names=['slide_id','Y','Y_hat','p0','p1','p2','p3','p4'])
+df = pd.read_csv(args.csv_path, names=['slide_id','Y','Y_hat','p0','p1','p2','p3','p4'], header=0)
 y_true = df['Y'].to_numpy(dtype = int)
 y_true_onehot = np.zeros((len(y_true), 5), dtype = float)
 for idx, y in enumerate(y_true):
