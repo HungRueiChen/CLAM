@@ -46,6 +46,22 @@ class Accuracy_Logger(object):
         
         return acc, correct, count
 
+class LogWriter(object):
+    def __init__(self):
+        self.history = {}
+
+    def update_dict(self, epoch, keys, values):
+        assert len(keys) == len(values)
+        for idx, k in enumerate(keys):
+            if k not in self.history:
+                self.history[k] = []
+            while len(self.history[k]) <= epoch:
+                self.history[k].append(None)
+            self.history[k][epoch] = values[idx]
+
+    def save_csv(self, csv_path):
+        pd.DataFrame(self.history).to_csv(csv_path, index = False)
+
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
     def __init__(self, patience=20, stop_epoch=50, verbose=False):
@@ -101,6 +117,7 @@ def train(datasets, cur, args):
     if args.log_data:
         from tensorboardX import SummaryWriter
         writer = SummaryWriter(writer_dir, flush_secs=15)
+        csv_logger = LogWriter()
 
     else:
         writer = None
@@ -183,14 +200,14 @@ def train(datasets, cur, args):
 
     for epoch in range(args.max_epochs):
         if args.model_type in ['clam_sb', 'clam_mb'] and not args.no_inst_cluster:     
-            train_loop_clam(epoch, model, train_loader, optimizer, args.n_classes, args.bag_weight, writer, loss_fn)
+            train_loop_clam(epoch, model, train_loader, optimizer, args.n_classes, args.bag_weight, writer, csv_logger, loss_fn)
             stop = validate_clam(cur, epoch, model, val_loader, args.n_classes, 
-                early_stopping, writer, loss_fn, args.results_dir)
+                early_stopping, writer, csv_logger, loss_fn, args.results_dir)
         
         else:
-            train_loop(epoch, model, train_loader, optimizer, args.n_classes, writer, loss_fn)
+            train_loop(epoch, model, train_loader, optimizer, args.n_classes, writer, csv_logger, loss_fn)
             stop = validate(cur, epoch, model, val_loader, args.n_classes, 
-                early_stopping, writer, loss_fn, args.results_dir)
+                early_stopping, writer, csv_logger, loss_fn, args.results_dir)
         
         if stop: 
             break
@@ -222,7 +239,7 @@ def train(datasets, cur, args):
     return results_dict, test_auc, val_auc, 1-test_error, 1-val_error 
 
 
-def train_loop_clam(epoch, model, loader, optimizer, n_classes, bag_weight, writer = None, loss_fn = None):
+def train_loop_clam(epoch, model, loader, optimizer, n_classes, bag_weight, writer = None, csv_logger = None, loss_fn = None):
     model.train()
     acc_logger = Accuracy_Logger(n_classes=n_classes)
     inst_logger = Accuracy_Logger(n_classes=n_classes)
@@ -289,7 +306,10 @@ def train_loop_clam(epoch, model, loader, optimizer, n_classes, bag_weight, writ
         writer.add_scalar('train/error', train_error, epoch)
         writer.add_scalar('train/clustering_loss', train_inst_loss, epoch)
 
-def train_loop(epoch, model, loader, optimizer, n_classes, writer = None, loss_fn = None):   
+    if csv_logger:
+        csv_logger.update_dict(epoch, ['loss', 'accuracy'], [train_loss, 1.0 - train_error])
+
+def train_loop(epoch, model, loader, optimizer, n_classes, writer = None, csv_logger = None, loss_fn = None):   
     model.train()
     acc_logger = Accuracy_Logger(n_classes=n_classes)
     train_loss = 0.
@@ -333,8 +353,10 @@ def train_loop(epoch, model, loader, optimizer, n_classes, writer = None, loss_f
         writer.add_scalar('train/loss', train_loss, epoch)
         writer.add_scalar('train/error', train_error, epoch)
 
+    if csv_logger:
+        csv_logger.update_dict(epoch, ['loss', 'accuracy'], [train_loss, 1.0 - train_error])
    
-def validate(cur, epoch, model, loader, n_classes, early_stopping = None, writer = None, loss_fn = None, results_dir=None):
+def validate(cur, epoch, model, loader, n_classes, early_stopping = None, writer = None, csv_logger = None, loss_fn = None, results_dir=None):
     model.eval()
     acc_logger = Accuracy_Logger(n_classes=n_classes)
     # loader.dataset.update_mode(True)
@@ -377,6 +399,10 @@ def validate(cur, epoch, model, loader, n_classes, early_stopping = None, writer
         writer.add_scalar('val/auc', auc, epoch)
         writer.add_scalar('val/error', val_error, epoch)
 
+    if csv_logger:
+        csv_logger.update_dict(epoch, ['val_loss', 'val_accuracy'], [val_loss, 1.0 - val_error])
+        csv_logger.save_csv(os.path.join(results_dir, 'log.csv'))
+
     print('\nVal Set, val_loss: {:.4f}, val_error: {:.4f}, auc: {:.4f}'.format(val_loss, val_error, auc))
     for i in range(n_classes):
         acc, correct, count = acc_logger.get_summary(i)
@@ -392,7 +418,7 @@ def validate(cur, epoch, model, loader, n_classes, early_stopping = None, writer
 
     return False
 
-def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, writer = None, loss_fn = None, results_dir = None):
+def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, writer = None, csv_logger = None, loss_fn = None, results_dir = None):
     model.eval()
     acc_logger = Accuracy_Logger(n_classes=n_classes)
     inst_logger = Accuracy_Logger(n_classes=n_classes)
@@ -463,6 +489,9 @@ def validate_clam(cur, epoch, model, loader, n_classes, early_stopping = None, w
         writer.add_scalar('val/error', val_error, epoch)
         writer.add_scalar('val/inst_loss', val_inst_loss, epoch)
 
+    if csv_logger:
+        csv_logger.update_dict(epoch, ['val_loss', 'val_accuracy'], [val_loss, 1.0 - val_error])
+        csv_logger.save_csv(os.path.join(results_dir, 'log.csv'))
 
     for i in range(n_classes):
         acc, correct, count = acc_logger.get_summary(i)
