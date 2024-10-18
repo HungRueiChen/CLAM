@@ -77,6 +77,7 @@ def draw_cm(y_true, y_pred, log_dir, f_name, result_dict, classes):
     fig_cm = plt.figure(figsize = (18, 6))
 
     for i, mtx in enumerate([cm, cm_norm.round(3)]):
+        print(cm)
         plt.subplot(1, 2, i+1)
         plt.imshow(mtx, interpolation = 'nearest', vmin = 0, cmap = plt.cm.Blues)
         plt.colorbar()
