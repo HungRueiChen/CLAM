@@ -39,7 +39,7 @@ log_dir = Path(args.csv_path).parent
 
 # Plot learning curves
 if os.path.isfile(args.log_path):
-    log_df = pd.read_csv(args.log_path, index_col = 'epoch')
+    log_df = pd.read_csv(args.log_path)
     loss = log_df['loss'].to_list()
     val_loss = log_df['val_loss'].to_list()
     acc = log_df['accuracy'].to_list()
