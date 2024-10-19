@@ -17,8 +17,9 @@ from sklearn.metrics import confusion_matrix, roc_curve, auc, f1_score, matthews
 from sklearn.utils.class_weight import compute_class_weight
 
 # arguments
-parser = argparse.ArgumentParser(description="Test the Best Model on Given Directory with Metrics ", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("csv_path", help = 'foldX.csv under RESULT_DIR')
+parser = argparse.ArgumentParser(description="Calculate stats and generate figures according to prediction results", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("--log_path", help = 'log.csv under RESULTS_DIR')
+parser.add_argument("--csv_path", help = 'fold_X.csv under EVAL_DIR')
 args = parser.parse_args()
 
 # json encoder for special data types
@@ -35,6 +36,32 @@ class NumpyEncoder(json.JSONEncoder):
 # define variables
 classes = ['ALL', 'AML', 'CML', 'Lymphoma', 'MM']
 log_dir = Path(args.csv_path).parent
+
+# Plot learning curves
+if os.path.isfile(args.log_path):
+    log_df = pd.read_csv(args.log_path, index_col = 'epoch')
+    loss = log_df['loss'].to_list()
+    val_loss = log_df['val_loss'].to_list()
+    acc = log_df['accuracy'].to_list()
+    val_acc = log_df['val_accuracy'].to_list()
+    epochs_range = range(1, len(loss)+1)
+
+    learning_curve = plt.figure(figsize=(10, 5))
+
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs_range, loss, label='Training Loss')
+    plt.plot(epochs_range, val_loss, label='Validation Loss')
+    plt.legend(loc='upper right', fontsize = 10)
+    plt.title('Training and Validation Loss', fontsize = 15)
+
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs_range, acc, label='Training Accuracy')
+    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right', fontsize = 10)
+    plt.title('Training and Validation Accuracy', fontsize = 15)
+
+    learning_curve.suptitle('Learning Curves')
+    learning_curve.savefig(log_dir / 'Learning_curve.png', bbox_inches = 'tight')
 
 # Test Section
 # Define functions
@@ -195,7 +222,7 @@ y_pred_probs = df[['p0','p1','p2','p3','p4']].to_numpy(dtype = float)
 result_dict = {}
 
 # patient level, mode count for roc curve
-f_name = 'CLAM_1fold_default_params'
+f_name = 'ResNet50_single_branch_CLAM'
 calculate_metrics(y_true, y_pred, f_name, result_dict, classes)
 draw_cm(y_true, y_pred, log_dir, f_name, result_dict, classes)
 draw_roc_curve(y_true_onehot, y_pred_probs, log_dir, f_name, result_dict, classes)
