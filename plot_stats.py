@@ -104,7 +104,6 @@ def draw_cm(y_true, y_pred, log_dir, f_name, result_dict, classes):
     fig_cm = plt.figure(figsize = (18, 6))
 
     for i, mtx in enumerate([cm, cm_norm.round(3)]):
-        print(cm)
         plt.subplot(1, 2, i+1)
         plt.imshow(mtx, interpolation = 'nearest', vmin = 0, cmap = plt.cm.Blues)
         plt.colorbar()
@@ -230,7 +229,7 @@ draw_roc_curve(y_true_onehot, y_pred_probs, log_dir, f_name, result_dict, classe
 with open(log_dir / 'test_metrics.json', 'w') as f:
     json.dump(result_dict, f, cls = NumpyEncoder)
 
-method_list = ['CLAM_1fold_default_params']
+method_list = [f_name]
 metric_list = ['accuracy', 'balanced_accuracy', 'f1_macro', 'matthews_CC', 'cohen_kappa', 'auc_micro', 'auc_macro']
 result_arr = np.zeros((len(method_list), len(metric_list)))
 for i, method in enumerate(method_list):
